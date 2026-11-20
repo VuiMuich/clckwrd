@@ -92,6 +92,7 @@ fn get_minutes_words(minutes: u8, template: &Template) -> &String {
         8 => &template.minutes.twenty_to,
         9 => &template.minutes.quarter_to,
         10 => &template.minutes.ten_to,
+        11 | 12 => &template.minutes.five_to,
         _ => &template.minutes.mini_err,
     }
 }
