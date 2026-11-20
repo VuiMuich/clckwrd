@@ -1,4 +1,4 @@
-use std::thread::sleep;
+use std::{thread::sleep, time::Duration};
 
 use crate::template::Template;
 use rand::seq::SliceRandom;
@@ -12,8 +12,9 @@ pub(crate) fn get_time_in_words(template: &Template, local: Time) -> String {
     let delta_minutes = local.minute() % 5;
     let start_sentence = template.start_sentence.choose(&mut rand::thread_rng());
     let preposition = get_preposition(delta_minutes, template);
-    let minutes = get_proxy_minutes(local);
-    let hours = get_proxy_hours(minutes, local);
+    // let minutes = get_proxy_minutes(local);
+    // let hours = get_proxy_hours(minutes, local);
+    let (hours, minutes) = gex_proximity(local);
     let minutes_string = get_minutes_words(minutes, template);
     let hour_string = get_hours_words(hours, template);
     let special_cases = get_special_case_words(local, template);
@@ -46,16 +47,17 @@ pub(crate) fn get_time_in_words(template: &Template, local: Time) -> String {
 }
 
 fn get_special_case_words(local: Time, template: &Template) -> Option<&String> {
-    match &*format!("{}:{}", local.hour(), local.minute()) {
-        "23:58" | "23:59" => Some(&template.special_cases.before_midnight),
-        "00:00" => Some(&template.special_cases.midnight),
-        "00:01" | "00:02" => Some(&template.special_cases.after_midnight),
-        "00:58" | "12:58" => Some(&template.special_cases.two_to_one),
-        "00:59" | "12:59" => Some(&template.special_cases.one_to_one),
-        "01:00" | "13:00" => Some(&template.special_cases.exactly_one),
-        "01:01" | "13:01 " => Some(&template.special_cases.one_past_one),
-        "01:02" | "13:02" => Some(&template.special_cases.two_past_one),
-        "12:00" => Some(&template.special_cases.high_noon),
+    // match &*format!("{:02}:{:02}", local.hour(), local.minute()) {
+    match (local.hour(), local.minute()) {
+        (23, 58) | (23, 59) => Some(&template.special_cases.before_midnight),
+        (00, 00) => Some(&template.special_cases.midnight),
+        (00, 01) | (00, 02) => Some(&template.special_cases.after_midnight),
+        (00, 58) | (12, 58) => Some(&template.special_cases.two_to_one),
+        (00, 59) | (12, 59) => Some(&template.special_cases.one_to_one),
+        (01, 00) | (13, 00) => Some(&template.special_cases.exactly_one),
+        (01, 01) | (13, 01) => Some(&template.special_cases.one_past_one),
+        (01, 02) | (13, 02) => Some(&template.special_cases.two_past_one),
+        (12, 00) => Some(&template.special_cases.high_noon),
         _ => None,
     }
 }
@@ -90,25 +92,23 @@ fn get_minutes_words(minutes: u8, template: &Template) -> &String {
         8 => &template.minutes.twenty_to,
         9 => &template.minutes.quarter_to,
         10 => &template.minutes.ten_to,
-        11 | 12 => &template.minutes.five_to,
         _ => &template.minutes.mini_err,
     }
 }
 
-// We want only have precise wording for every fith minute, so we want to know, when we give aproximate times
-fn get_proxy_minutes(local: Time) -> u8 {
-    match local.minute() % 5 {
-        3 | 4 => (local.minute() + 5) / 5,
-        _ => local.minute() / 5,
-    }
-}
-
-// We want to know when we need precise and when to use aproixmated wording
-fn get_proxy_hours(minutes: u8, local: Time) -> u8 {
-    match minutes {
-        4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 => (local.hour() % 12 + 1) % 12,
-        _ => local.hour() % 12,
-    }
+// We want to make sure we only use precise wording, when needed and round or use the upcoming hour otherwise
+fn gex_proximity(local: Time) -> (u8, u8) {
+    let minute_slot = (local.minute() + 2) / 5;
+    let (minute_slot, hour_overflow) = if minute_slot == 12 {
+        (0, 1)
+    } else {
+        (minute_slot, 0)
+    };
+    let next_hour = u8::from(minute_slot >= 4); //TODO: take it from the template
+    (
+        minute_slot,
+        (local.hour() as u8 + hour_overflow + next_hour) % 12,
+    )
 }
 
 fn get_preposition(delta_minute: u8, template: &Template) -> Option<&String> {
@@ -129,29 +129,25 @@ fn get_preposition(delta_minute: u8, template: &Template) -> Option<&String> {
     }
 }
 
-pub(crate) fn time_loop_template(mut earlier: Instant, template: &Template) -> ! {
+pub(crate) fn time_loop_template(template: &Template) -> ! {
     loop {
-        let local = OffsetDateTime::now_local().unwrap().time();
-        // Print on every full minute and update immediatley if the last update happened more then a minute ago
-        if local.second() == 59 || earlier.elapsed() > 61.std_seconds() {
-            // TODO rewrite the following with a cooldown time (30s?) for updates
-            println!("{}", get_time_in_words(template, local));
-            earlier = Instant::now();
-        }
-        sleep(1.std_seconds());
+        let now = OffsetDateTime::now_local().unwrap();
+        println!("{}", get_time_in_words(template, now.time()));
+        let wait = Duration::from_secs(u64::from(60 - now.second()))
+            - Duration::from_nanos(u64::from(now.nanosecond()))
+            + Duration::from_millis(50);
+        sleep(wait);
     }
 }
 
-pub(crate) fn time_loop_simple(mut earlier: Instant) -> ! {
+pub(crate) fn time_loop_simple() -> ! {
     loop {
-        let local = OffsetDateTime::now_local().unwrap();
-        // Print on every full minute and update immediatley if the last update happened more then a minute ago
-        if local.second() == 59 || earlier.elapsed() > 61.std_seconds() {
-            // TODO rewrite the following with a cooldown time (30s?) for updates
-            println!("{}", get_simple_time());
-            earlier = Instant::now();
-        }
-        sleep(1.std_seconds());
+        let now = OffsetDateTime::now_local().unwrap();
+        println!("{}", get_simple_time());
+        let wait = Duration::from_secs(u64::from(60 - now.second()))
+            - Duration::from_nanos(u64::from(now.nanosecond()))
+            + Duration::from_millis(50);
+        sleep(wait);
     }
 }
 

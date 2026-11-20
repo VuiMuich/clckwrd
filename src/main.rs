@@ -57,7 +57,7 @@ fn main() {
             return;
         }
 
-        time_loop_simple(earlier)
+        time_loop_simple()
     };
 
     println!(
@@ -69,7 +69,7 @@ fn main() {
         return;
     }
 
-    time_loop_template(earlier, &template)
+    time_loop_template(&template)
 }
 
 // Testcases:
