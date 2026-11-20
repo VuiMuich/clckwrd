@@ -17,7 +17,7 @@ use crate::{
     time_processing::{get_simple_time, get_time_in_words, time_loop_simple, time_loop_template},
 };
 use clap::{arg, command};
-use time::{Instant, OffsetDateTime};
+use time::OffsetDateTime;
 
 // TODO implement structs properly
 // - write Tests for special cases, testing randomness of prepositions, check some random times.
@@ -49,15 +49,13 @@ fn main() {
         _ => Template::default(),
     };
 
-    let earlier = Instant::now();
-
     if args.get_flag("digital") {
         println!("{}", get_simple_time());
         if args.get_flag("quit") {
             return;
         }
 
-        time_loop_simple(earlier)
+        time_loop_simple()
     };
 
     println!(
@@ -69,7 +67,7 @@ fn main() {
         return;
     }
 
-    time_loop_template(earlier, &template)
+    time_loop_template(&template)
 }
 
 // Testcases:
@@ -96,6 +94,6 @@ fn test_midnight() {
             time::Time::MIDNIGHT.hour(),
             &template::Template::default()
         ),
-        &String::from("zwölf")
+        &String::from("twelve")
     )
 }
