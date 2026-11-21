@@ -23,7 +23,6 @@ use time::OffsetDateTime;
 // - write Tests for special cases, testing randomness of prepositions, check some random times.
 // - clean up 'err' and make fn panic
 // - import language templates
-// - default to english
 // - add 'write to file'
 // - load template files
 // - handle Errors
@@ -32,21 +31,33 @@ fn main() {
         .author("Johannes Mayrhofer <vuimuich@quantentunnel.de>")
         .version(env!("CARGO_PKG_VERSION"))
         .about("prints current system time in words continuously")
+        .after_help(templates_help())
         .args(&[
-            arg!( -q --quit "Prints time in words only once."),
-            arg!( -d --digital "Prints time as digital clock in HH:MM (24h)."),
+            arg!( -q --quit "Prints time in words only once"),
+            arg!( -d --digital "Prints time as digital clock in HH:MM (24h)"),
             arg!( -l --language "Chose language. Available Languages see below"),
-            arg!( -t --template "Specifiy a template path."),
-            arg!( -o --output "Wirte output to file with specified path."),
+            arg!( -t --template <NAME> "Use template file <NAME>.ron from $XDG_CONFIG_HOME/uhrwerk/templates")
+                .conflicts_with("path"),
+            arg!( -p --path <PATH> "Use template from a custom path" ),
+            arg!( -o --output "Wirte output to file with specified path"),
             arg!([INPUT] "Sets the input path"),
             arg!([OUTPUT] "Sets the output path"),
         ])
         .get_matches();
 
-    let template_path = args.get_one::<String>("INPUT").map(String::as_str);
-    let template = match template_path {
-        Some(t) => file_handler::load_template(Some(t.to_string())),
-        _ => Template::default(),
+    let template = match (
+        args.get_one::<String>("path"),
+        args.get_one::<String>("template"),
+    ) {
+        (Some(path), _) => file_handler::load_template(Some(path.clone())),
+        (None, Some(name)) => match file_handler::find_template(name) {
+            Some(p) => file_handler::load_template(Some(p.to_string_lossy().into_owned())),
+            None => {
+                eprintln!("uhrwerk: template '{name}.ron' not found in config dir");
+                std::process::exit(1);
+            }
+        },
+        (None, None) => Template::default(),
     };
 
     if args.get_flag("digital") {
@@ -68,6 +79,19 @@ fn main() {
     }
 
     time_loop_template(&template)
+}
+
+fn templates_help() -> String {
+    let dir = file_handler::template_dir()
+        .map(|d| d.display().to_string())
+        .unwrap_or_else(|| "<no config dir>".into());
+    let names = file_handler::list_templates();
+
+    if names.is_empty() {
+        format!("Templates in {dir}:\n  (none found)")
+    } else {
+        format!("Templates in {dir}:\n  {}", names.join("\n  "))
+    }
 }
 
 // Testcases:
