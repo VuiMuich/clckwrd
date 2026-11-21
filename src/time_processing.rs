@@ -2,7 +2,7 @@ use std::{thread::sleep, time::Duration};
 
 use crate::template::Template;
 use rand::seq::SliceRandom;
-use time::{format_description, OffsetDateTime, Time};
+use time::{format_description::parse_borrowed, OffsetDateTime, Time};
 
 // TODO
 // - clean up 'err' and make fn panic
@@ -149,7 +149,7 @@ pub(crate) fn time_loop_simple() -> ! {
 }
 
 pub(crate) fn get_simple_time() -> String {
-    let format = format_description::parse("[hour]:[minute]").unwrap();
+    let format = parse_borrowed::<1>("[hour]:[minute]").unwrap();
     OffsetDateTime::now_local()
         .unwrap()
         .time()
