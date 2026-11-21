@@ -1,6 +1,6 @@
 [package]
 name = "uhrwerk"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["VuiMuich <jm.spam@gmx.net>"]
 edition = "2021"
 
