@@ -19,7 +19,12 @@
         naersk-lib = pkgs.callPackage naersk { };
       in
       {
-        defaultPackage = naersk-lib.buildPackage ./.;
+        defaultPackage = naersk-lib.buildPackage {
+          src = ./.;
+          postInstall = ''
+            install -Dm644 -t $out/share/uhrwerk/templates time-in-words-templates/*.ron
+          '';
+        };
         devShell =
           with pkgs;
           mkShell {
