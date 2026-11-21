@@ -1,5 +1,8 @@
 (
 language: "english_1",
+language_label: "English Variant 1",
+
+next_hour_from: 35,
 
 hours: (
   one: "one",

@@ -7,14 +7,11 @@ use time::{format_description, OffsetDateTime, Time};
 // TODO
 // - clean up 'err' and make fn panic
 // - import language templates
-// - default to english
 pub(crate) fn get_time_in_words(template: &Template, local: Time) -> String {
     let delta_minutes = local.minute() % 5;
     let start_sentence = template.start_sentence.choose(&mut rand::thread_rng());
     let preposition = get_preposition(delta_minutes, template);
-    // let minutes = get_proxy_minutes(local);
-    // let hours = get_proxy_hours(minutes, local);
-    let (minute_slot, hour_overflow) = gex_proximity(local);
+    let (minute_slot, hour_overflow) = gex_proximity(local, template);
     let minutes_string = get_minutes_words(minute_slot, template);
     let hour_string = get_hours_words(hour_overflow, template);
     let special_cases = get_special_case_words(local, template);
@@ -47,7 +44,6 @@ pub(crate) fn get_time_in_words(template: &Template, local: Time) -> String {
 }
 
 fn get_special_case_words(local: Time, template: &Template) -> Option<&String> {
-    // match &*format!("{:02}:{:02}", local.hour(), local.minute()) {
     match (local.hour(), local.minute()) {
         (23, 58) | (23, 59) => Some(&template.special_cases.before_midnight),
         (00, 00) => Some(&template.special_cases.midnight),
@@ -98,14 +94,14 @@ fn get_minutes_words(minutes: u8, template: &Template) -> &String {
 }
 
 // We want to make sure we only use precise wording, when needed and round or use the upcoming hour otherwise
-fn gex_proximity(local: Time) -> (u8, u8) {
+fn gex_proximity(local: Time, template: &Template) -> (u8, u8) {
     let minute_slot = (local.minute() + 2) / 5;
     let (minute_slot, hour_overflow) = if minute_slot == 12 {
         (0, 1)
     } else {
         (minute_slot, 0)
     };
-    let next_hour = u8::from(minute_slot >= 4); //TODO: take it from the template
+    let next_hour = u8::from(minute_slot >= template.next_hour_from);
     (
         minute_slot,
         (local.hour() as u8 + hour_overflow + next_hour) % 12,

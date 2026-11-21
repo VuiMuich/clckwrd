@@ -1,5 +1,8 @@
 (
     language: "deutsh_1",
+    lagnuag_label: "Deutsch Variante 1",
+
+    next_hour_from: 20,
 
     hours: (
         one: "eins",

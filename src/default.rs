@@ -6,6 +6,8 @@ use crate::{
 impl Default for Template {
     fn default() -> Self {
         let language = String::from("default_english");
+        let language_label = String::from("Enlisch (builtin default)");
+        let next_hour_from = 35;
         let minutes: Minutes = Minutes {
             five_past: String::from("five past"),
             ten_past: String::from("ten past"),
@@ -81,6 +83,8 @@ impl Default for Template {
         //println!("Default template loaded.");
         Template {
             language,
+            language_label,
+            next_hour_from,
             hours,
             minutes,
             prepositions,
