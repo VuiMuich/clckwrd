@@ -29,7 +29,7 @@ use time::OffsetDateTime;
 // - handle Errors
 fn main() {
     let args = command!("Uhrwerk")
-        .author("Johannes Mayrhofer <jm.spam@gmx.net>")
+        .author("Johannes Mayrhofer <vuimuich@quantentunnel.de>")
         .version(env!("CARGO_PKG_VERSION"))
         .about("prints current system time in words continuously")
         .args(&[
