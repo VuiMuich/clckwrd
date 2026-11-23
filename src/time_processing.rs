@@ -7,6 +7,15 @@ use time::{format_description::parse_borrowed, OffsetDateTime, Time};
 // TODO
 // - clean up 'err' and make fn panic
 // - import language templates
+pub(crate) fn get_simple_time() -> String {
+    let format = parse_borrowed::<1>("[hour]:[minute]").unwrap();
+    OffsetDateTime::now_local()
+        .unwrap()
+        .time()
+        .format(&format)
+        .unwrap()
+}
+
 pub(crate) fn get_time_in_words(template: &Template, local: Time) -> String {
     let delta_minutes = local.minute() % 5;
     let start_sentence = template.start_sentence.choose(&mut rand::thread_rng());
@@ -137,10 +146,7 @@ pub(crate) fn time_loop_template(template: &Template, addendum: bool) -> ! {
             )
         }
         println!("{}", get_time_in_words(template, now.time()));
-        let wait = Duration::from_secs(u64::from(60 - now.second()))
-            - Duration::from_nanos(u64::from(now.nanosecond()))
-            + Duration::from_millis(50);
-        sleep(wait);
+        loop_delay(now);
     }
 }
 
@@ -148,20 +154,32 @@ pub(crate) fn time_loop_simple() -> ! {
     loop {
         let now = OffsetDateTime::now_local().unwrap();
         println!("{}", get_simple_time());
-        let wait = Duration::from_secs(u64::from(60 - now.second()))
-            - Duration::from_nanos(u64::from(now.nanosecond()))
-            + Duration::from_millis(50);
-        sleep(wait);
+        loop_delay(now);
     }
 }
 
-pub(crate) fn get_simple_time() -> String {
-    let format = parse_borrowed::<1>("[hour]:[minute]").unwrap();
-    OffsetDateTime::now_local()
-        .unwrap()
-        .time()
-        .format(&format)
-        .unwrap()
+pub(crate) fn time_loop_combined(template: &Template, addendum: bool) -> ! {
+    loop {
+        let now = OffsetDateTime::now_local().unwrap();
+        if addendum {
+            println!(
+                "{} {:?}",
+                get_time_in_words(&template, now.time()),
+                template.addendum.choose(&mut rand::thread_rng()).unwrap()
+            )
+        }
+        println!(
+            "{} or in other words: {}",
+            get_simple_time(),
+            get_time_in_words(&template, now.time())
+        );
+        loop_delay(now);
+    }
 }
 
+fn loop_delay(now: OffsetDateTime) {
+    let wait = Duration::from_secs(u64::from(60 - now.second()))
+        - Duration::from_nanos(u64::from(now.nanosecond()))
+        + Duration::from_millis(50);
+    sleep(wait);
 }
