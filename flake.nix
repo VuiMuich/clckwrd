@@ -19,17 +19,18 @@
         naersk-lib = pkgs.callPackage naersk { };
       in
       {
-        defaultPackage = naersk-lib.buildPackage {
+        packages.default = naersk-lib.buildPackage {
           src = ./.;
           postInstall = ''
             install -Dm644 -t $out/share/uhrwerk/templates time-in-words-templates/*.ron
           '';
         };
-        devShell =
+        devShells.default =
           with pkgs;
           mkShell {
             buildInputs = [
               cargo
+              lldb
               rustc
               rustfmt
               rust-analyzer
