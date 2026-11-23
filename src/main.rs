@@ -10,6 +10,7 @@ mod minutes;
 mod prepositions;
 mod special_cases;
 mod template;
+mod tests;
 mod time_processing;
 
 use crate::{
@@ -92,32 +93,4 @@ fn templates_help() -> String {
     } else {
         format!("Templates in {dir}:\n  {}", names.join("\n  "))
     }
-}
-
-// Testcases:
-// - test for each hour the correct sentence array is chosen.
-// - test for each minute the correct sentence array is chosen.
-// - test special cases
-#[test]
-// fn test_hours() {
-//     use crate::default;
-//     use crate::hours;
-//     use time;
-
-//     let template = template::Template::default;
-
-//     for i in 0..23 {
-//         let test_hour = time::Time::from_hms(i, 0, 0);
-//         let test_default = template.hours[i];
-//     }
-// }
-
-fn test_midnight() {
-    assert_eq!(
-        crate::time_processing::get_hours_words(
-            time::Time::MIDNIGHT.hour(),
-            &template::Template::default()
-        ),
-        &String::from("twelve")
-    )
 }

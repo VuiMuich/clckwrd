@@ -157,15 +157,4 @@ pub(crate) fn get_simple_time() -> String {
         .unwrap()
 }
 
-#[test]
-fn every_minute_is_sane() {
-    let tpl =
-        crate::file_handler::load_template(Some("./time-in-words-templates/de.ron".to_string())); // or whatever the loader is
-    for h in 0..24u8 {
-        for m in 0..60u8 {
-            let s = get_time_in_words(&tpl, Time::from_hms(h, m, 0).unwrap());
-            assert!(!s.is_empty(), "{h:02}:{m:02}");
-            assert!(!s.contains("err"), "{h:02}:{m:02} -> {s}"); // hour_err / mini_err / prepo_err
-        }
-    }
 }
