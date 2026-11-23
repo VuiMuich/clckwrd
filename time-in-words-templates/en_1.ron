@@ -63,7 +63,6 @@
   //template: "It’s {{ p }} {{ m }} {{ h }}."
 
   add_text: [
-    "Time to dance.",
     "Time to do something good.",
     "Time to just do it and stick with it.",
     "Time to do more than just talk.",
@@ -127,8 +126,8 @@
     "Time for you.",
     "Time for me.",
     "Take your time.",
-    "Time you must take!",
-    "Time to catch an insect and ",
+    "Time you must take! (Yoda, kind of)",
+    "Time to catch an insect and ...",
     "Time for a fresh start.",
     "Time to do something crazy.",
     "Time for very slow eating.",
