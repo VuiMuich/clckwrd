@@ -126,9 +126,16 @@ fn get_preposition(delta_minute: u8, template: &Template) -> Option<&String> {
     }
 }
 
-pub(crate) fn time_loop_template(template: &Template) -> ! {
+pub(crate) fn time_loop_template(template: &Template, addendum: bool) -> ! {
     loop {
         let now = OffsetDateTime::now_local().unwrap();
+        if addendum {
+            println!(
+                "{} {}",
+                get_time_in_words(template, now.time()),
+                template.addendum.choose(&mut rand::thread_rng()).unwrap()
+            )
+        }
         println!("{}", get_time_in_words(template, now.time()));
         let wait = Duration::from_secs(u64::from(60 - now.second()))
             - Duration::from_nanos(u64::from(now.nanosecond()))

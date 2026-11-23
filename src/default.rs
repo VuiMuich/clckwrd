@@ -80,7 +80,8 @@ impl Default for Template {
             String::from("minute"),
             String::from("hour"),
         ];
-        //println!("Default template loaded.");
+        let addendum = vec![];
+
         Template {
             language,
             language_label,
@@ -93,6 +94,7 @@ impl Default for Template {
             end_sentence,
             on_the_hour_template,
             normal_template,
+            addendum,
         }
     }
 }

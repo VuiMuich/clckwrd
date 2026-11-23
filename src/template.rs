@@ -19,4 +19,6 @@ pub(crate) struct Template {
     pub on_the_hour_template: Vec<String>,
     pub normal_template: Vec<String>,
     pub next_hour_from: u8,
+    #[serde(rename = "add_text")]
+    pub addendum: Vec<String>,
 }
