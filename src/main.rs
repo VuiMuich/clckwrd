@@ -1,6 +1,5 @@
 // Uhrwerk is a CLI tool to print 'time in words'
-// It is heavily inspired by TickeTack (www.ticketack.de) and actually uses their language strings currently
-// Copyright 2021, Johannes Mayrhofer
+// It is heavily inspired by TickeTack (www.ticketack.de) and actuallrand::seq::SliceRandom::choose(&template.addendum, &mutrand::thread_rng())ight 2021, Johannes Mayrhofer
 // License MIT
 
 mod default;
@@ -40,7 +39,11 @@ fn main() {
         .after_help(templates_help())
         .args(&[
             arg!( -q --quit "Prints time in words only once"),
-            arg!( -d --digital "Prints time as digital clock in HH:MM (24h)"),
+            arg!( -a --addendum "Add a random selection from the templates `add_text` array." ),
+            arg!( -d --digital "Prints time as digital clock in HH:MM (24h) format"),
+            arg!( -c --combined "Combines regular output with digital clock output (see '-d|--digital' flag)" ), 
+            arg!( -i --input <TIME> "Manually input a time in HH:MM (24h) format, implies `-q|--quit`" )
+                .conflicts_with("digital"),
             arg!( -l --language "Chose language. Available Languages see below"),
             arg!( -t --template <NAME> "Use template file <NAME>.ron from $XDG_CONFIG_HOME/uhrwerk/templates")
                 .conflicts_with("path"),
@@ -55,9 +58,9 @@ fn main() {
         args.get_one::<String>("path"),
         args.get_one::<String>("template"),
     ) {
-        (Some(path), _) => file_handler::load_template(Some(path.clone())),
+        (Some(path), _) => file_handler::load_template(Some(Path::new(path))),
         (None, Some(name)) => match file_handler::find_template(name) {
-            Some(p) => file_handler::load_template(Some(p.to_string_lossy().into_owned())),
+            Some(p) => file_handler::load_template(Some(&p)),
             None => {
                 eprintln!("uhrwerk: template '{name}.ron' not found in config dir");
                 std::process::exit(1);
@@ -107,7 +110,6 @@ fn main() {
     }
 
     if args.get_flag("digital") {
-        println!("{}", get_simple_time());
         if args.get_flag("quit") {
             return;
         }
@@ -115,10 +117,10 @@ fn main() {
         time_loop_simple()
     };
 
-    println!(
-        "{}",
-        get_time_in_words(&template, OffsetDateTime::now_local().unwrap().time())
-    );
+    if args.get_flag("combined") {
+        if args.get_flag("quit") {
+            return;
+        }
 
         time_loop_combined(&template, addendum)
     };
