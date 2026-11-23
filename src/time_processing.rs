@@ -11,7 +11,7 @@ pub(crate) fn get_time_in_words(template: &Template, local: Time) -> String {
     let delta_minutes = local.minute() % 5;
     let start_sentence = template.start_sentence.choose(&mut rand::thread_rng());
     let preposition = get_preposition(delta_minutes, template);
-    let (minute_slot, hour_overflow) = gex_proximity(local, template);
+    let (minute_slot, hour_overflow) = get_proximity(local, template);
     let minutes_string = get_minutes_words(minute_slot, template);
     let hour_string = get_hours_words(hour_overflow, template);
     let special_cases = get_special_case_words(local, template);
@@ -94,7 +94,7 @@ fn get_minutes_words(minutes: u8, template: &Template) -> &String {
 }
 
 // We want to make sure we only use precise wording, when needed and round or use the upcoming hour otherwise
-fn gex_proximity(local: Time, template: &Template) -> (u8, u8) {
+pub(crate) fn get_proximity(local: Time, template: &Template) -> (u8, u8) {
     let minute_slot = (local.minute() + 2) / 5;
     let (minute_slot, hour_overflow) = if minute_slot == 12 {
         (0, 1)
