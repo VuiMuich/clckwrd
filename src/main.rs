@@ -59,12 +59,9 @@ fn main() {
         args.get_one::<String>("template"),
     ) {
         (Some(path), _) => file_handler::load_template(Some(Path::new(path))),
-        (None, Some(name)) => match file_handler::find_template(name) {
-            Some(p) => file_handler::load_template(Some(&p)),
-            None => {
-                eprintln!("uhrwerk: template '{name}.ron' not found in config dir");
-                std::process::exit(1);
-            }
+        (None, Some(name)) => if let Some(p) = file_handler::find_template(name) { file_handler::load_template(Some(&p)) } else {
+            eprintln!("uhrwerk: template '{name}.ron' not found in config dir");
+            std::process::exit(1);
         },
         (None, None) => Template::default(),
     };
@@ -76,7 +73,7 @@ fn main() {
                 "{} {}",
                 get_time_in_words(&template, OffsetDateTime::now_local().unwrap().time()),
                 template.addendum.choose(&mut rand::thread_rng()).unwrap()
-            )
+            );
         } else {
             println!(
                 "{}",
@@ -96,7 +93,7 @@ fn main() {
                     Time::parse(time_input, &fmt).expect("Wrong format, use `HH:MM`")
                 ),
                 template.addendum.choose(&mut rand::thread_rng()).unwrap()
-            )
+            );
         } else {
             println!(
                 "{}",
@@ -115,7 +112,7 @@ fn main() {
         }
 
         time_loop_simple()
-    };
+    }
 
     if args.get_flag("combined") {
         if args.get_flag("quit") {
@@ -123,15 +120,13 @@ fn main() {
         }
 
         time_loop_combined(&template, addendum)
-    };
+    }
 
     time_loop_template(&template, addendum)
 }
 
 fn templates_help() -> String {
-    let dir = file_handler::template_dir()
-        .map(|d| d.display().to_string())
-        .unwrap_or_else(|| "<no config dir>".into());
+    let dir = file_handler::template_dir().map_or_else(|| "<no config dir>".into(), |d| d.display().to_string());
     let names = file_handler::list_templates();
 
     if names.is_empty() {

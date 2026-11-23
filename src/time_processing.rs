@@ -26,7 +26,7 @@ pub(crate) fn get_time_in_words(template: &Template, local: Time) -> String {
     let special_cases = get_special_case_words(local, template);
 
     if let Some(is_special_case) = special_cases {
-        is_special_case.to_string()
+        is_special_case.clone()
     } else if minute_slot == 0 {
         format!(
             "{} {} {}.",
@@ -52,6 +52,8 @@ pub(crate) fn get_time_in_words(template: &Template, local: Time) -> String {
     }
 }
 
+#[allow(clippy::unnested_or_patterns)]
+#[allow(clippy::zero_prefixed_literal)]
 fn get_special_case_words(local: Time, template: &Template) -> Option<&String> {
     match (local.hour(), local.minute()) {
         (23, 58) | (23, 59) => Some(&template.special_cases.before_midnight),
@@ -113,7 +115,7 @@ pub(crate) fn get_proximity(local: Time, template: &Template) -> (u8, u8) {
     let next_hour = u8::from(minute_slot * 5 >= template.next_hour_from);
     (
         minute_slot,
-        (local.hour() as u8 + hour_overflow + next_hour) % 12,
+        (local.hour() + hour_overflow + next_hour) % 12,
     )
 }
 
@@ -143,7 +145,7 @@ pub(crate) fn time_loop_template(template: &Template, addendum: bool) -> ! {
                 "{} {}",
                 get_time_in_words(template, now.time()),
                 template.addendum.choose(&mut rand::thread_rng()).unwrap()
-            )
+            );
         }
         println!("{}", get_time_in_words(template, now.time()));
         loop_delay(now);
@@ -164,22 +166,21 @@ pub(crate) fn time_loop_combined(template: &Template, addendum: bool) -> ! {
         if addendum {
             println!(
                 "{} {:?}",
-                get_time_in_words(&template, now.time()),
+                get_time_in_words(template, now.time()),
                 template.addendum.choose(&mut rand::thread_rng()).unwrap()
-            )
+            );
         }
         println!(
             "{} or in other words: {}",
             get_simple_time(),
-            get_time_in_words(&template, now.time())
+            get_time_in_words(template, now.time())
         );
         loop_delay(now);
     }
 }
 
 fn loop_delay(now: OffsetDateTime) {
-    let wait = Duration::from_secs(u64::from(60 - now.second()))
-        - Duration::from_nanos(u64::from(now.nanosecond()))
+    let wait = Duration::from_secs(u64::from(60 - now.second())).checked_sub(Duration::from_nanos(u64::from(now.nanosecond()))).unwrap()
         + Duration::from_millis(50);
     sleep(wait);
 }

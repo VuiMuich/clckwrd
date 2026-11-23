@@ -68,13 +68,13 @@ impl Default for Template {
         };
         let start_sentence = vec![String::from("It's"), String::from("It is")];
         let end_sentence = vec![String::from("o'clock")];
-        let on_the_hour_template = vec![
+        let on_the_hour = vec![
             String::from("start_sentence"),
             String::from("prepostition"),
             String::from("hour"),
             String::from("end_sentence"),
         ];
-        let normal_template = vec![
+        let normal = vec![
             String::from("start_sentence"),
             String::from("prepostition"),
             String::from("minute"),
@@ -85,15 +85,15 @@ impl Default for Template {
         Template {
             language,
             language_label,
-            next_hour_from,
             hours,
             minutes,
             prepositions,
             special_cases,
             start_sentence,
             end_sentence,
-            on_the_hour_template,
-            normal_template,
+            on_the_hour,
+            normal,
+            next_hour_from,
             addendum,
         }
     }
