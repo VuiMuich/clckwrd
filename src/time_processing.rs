@@ -110,7 +110,7 @@ pub(crate) fn get_proximity(local: Time, template: &Template) -> (u8, u8) {
     } else {
         (minute_slot, 0)
     };
-    let next_hour = u8::from(minute_slot >= template.next_hour_from);
+    let next_hour = u8::from(minute_slot * 5 >= template.next_hour_from);
     (
         minute_slot,
         (local.hour() as u8 + hour_overflow + next_hour) % 12,
