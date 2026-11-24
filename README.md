@@ -2,6 +2,9 @@
 
 It is inspired by [TickeTack](http://ticketack.de/) and actually the language strings for German and English are currently taken directly from their website.
 
+![screenshot](screenshot.png)
+*Note: the [PTB Clock](httpsr//uhr.ptb.de) is just for reference, the desktop widget is a (yet to publish) widget for [Noctalia](https://noctaila.dev) which is the desktopshell used here together with their wonderful compositor `umbriel`.*
+
 ## Installation
 
 ### With Cargo
