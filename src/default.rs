@@ -68,6 +68,7 @@ impl Default for Template {
         };
         let start_sentence = vec![String::from("It's"), String::from("It is")];
         let end_sentence = vec![String::from("o'clock")];
+        let combine_bridge = String::from("or in other words");
         let on_the_hour = vec![
             String::from("start_sentence"),
             String::from("prepostition"),
@@ -90,6 +91,7 @@ impl Default for Template {
             prepositions,
             special_cases,
             start_sentence,
+            combine_bridge,
             end_sentence,
             on_the_hour,
             normal,

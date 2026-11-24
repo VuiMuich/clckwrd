@@ -17,6 +17,7 @@ pub(crate) struct Template {
     pub special_cases: SpecialCases,
     pub start_sentence: Vec<String>,
     pub end_sentence: Vec<String>,
+    pub combine_bridge: String,
     #[serde(rename = "on_the_hour_template")]
     pub on_the_hour: Vec<String>,
     #[serde(rename = "normal_template")]

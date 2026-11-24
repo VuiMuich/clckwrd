@@ -44,6 +44,7 @@
 
     start_sentence: ["Es ist", "Jetzt ist es"],
     end_sentence: ["Uhr."],
+    combine_bridge: "oder in Worten:",
     // template: "Es ist {{ p }} {{ m }} {{ h }}.",
     // onTheHourTemplate: "Es ist {{ p }} {{ h }} Uhr.",
     on_the_hour_template: ["start_sentence", "preposition", "hour", "end_sentence"],

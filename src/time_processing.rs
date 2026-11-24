@@ -143,7 +143,12 @@ pub(crate) fn render(mode: Mode, template: &Template, time: Time, addendum: bool
     match mode {
         Mode::Words => words(),
         Mode::Digital => get_simple_time(time),
-        Mode::Combined => format!("{} or in other words {}", get_simple_time(time), words()),
+        Mode::Combined => format!(
+            "{} {} {}",
+            get_simple_time(time),
+            template.combine_bridge,
+            words()
+        ),
     }
 }
 
