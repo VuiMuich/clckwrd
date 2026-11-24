@@ -1,5 +1,7 @@
 [package]
 name = "clckwrd"
+description = "Print time in words."
+license = "MIT"
 version = "0.3.0"
 edition = "2021"
 
