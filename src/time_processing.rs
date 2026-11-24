@@ -1,19 +1,14 @@
 use std::{thread::sleep, time::Duration};
 
-use crate::template::Template;
+use crate::{template::Template, Mode};
 use rand::seq::SliceRandom;
 use time::{format_description::parse_borrowed, OffsetDateTime, Time};
 
 // TODO
 // - clean up 'err' and make fn panic
-// - import language templates
-pub(crate) fn get_simple_time() -> String {
+pub(crate) fn get_simple_time(time: Time) -> String {
     let format = parse_borrowed::<1>("[hour]:[minute]").unwrap();
-    OffsetDateTime::now_local()
-        .unwrap()
-        .time()
-        .format(&format)
-        .unwrap()
+    time.format(&format).unwrap()
 }
 
 pub(crate) fn get_time_in_words(template: &Template, local: Time) -> String {
@@ -113,10 +108,7 @@ pub(crate) fn get_proximity(local: Time, template: &Template) -> (u8, u8) {
         (minute_slot, 0)
     };
     let next_hour = u8::from(minute_slot * 5 >= template.next_hour_from);
-    (
-        minute_slot,
-        (local.hour() + hour_overflow + next_hour) % 12,
-    )
+    (minute_slot, (local.hour() + hour_overflow + next_hour) % 12)
 }
 
 fn get_preposition(delta_minute: u8, template: &Template) -> Option<&String> {
@@ -137,50 +129,32 @@ fn get_preposition(delta_minute: u8, template: &Template) -> Option<&String> {
     }
 }
 
-pub(crate) fn time_loop_template(template: &Template, addendum: bool) -> ! {
-    loop {
-        let now = OffsetDateTime::now_local().unwrap();
+pub(crate) fn render(mode: Mode, template: &Template, time: Time, addendum: bool) -> String {
+    let words = || {
+        let mut s = get_time_in_words(template, time);
         if addendum {
-            println!(
-                "{} {}",
-                get_time_in_words(template, now.time()),
-                template.addendum.choose(&mut rand::thread_rng()).unwrap()
-            );
+            if let Some(a) = template.addendum.choose(&mut rand::thread_rng()) {
+                s.push(' ');
+                s.push_str(a);
+            }
         }
-        println!("{}", get_time_in_words(template, now.time()));
-        loop_delay(now);
+        s
+    };
+    match mode {
+        Mode::Words => words(),
+        Mode::Digital => get_simple_time(time),
+        Mode::Combined => format!("{} or in other words {}", get_simple_time(time), words()),
     }
 }
 
-pub(crate) fn time_loop_simple() -> ! {
+pub(crate) fn run_loop(mode: Mode, template: &Template, addendum: bool) -> ! {
     loop {
         let now = OffsetDateTime::now_local().unwrap();
-        println!("{}", get_simple_time());
-        loop_delay(now);
+        println!("{}", render(mode, template, now.time(), addendum));
+        let wait = Duration::from_secs(u64::from(60 - now.second()))
+            .checked_sub(Duration::from_nanos(u64::from(now.nanosecond())))
+            .unwrap()
+            + Duration::from_millis(50);
+        sleep(wait);
     }
-}
-
-pub(crate) fn time_loop_combined(template: &Template, addendum: bool) -> ! {
-    loop {
-        let now = OffsetDateTime::now_local().unwrap();
-        if addendum {
-            println!(
-                "{} {:?}",
-                get_time_in_words(template, now.time()),
-                template.addendum.choose(&mut rand::thread_rng()).unwrap()
-            );
-        }
-        println!(
-            "{} or in other words: {}",
-            get_simple_time(),
-            get_time_in_words(template, now.time())
-        );
-        loop_delay(now);
-    }
-}
-
-fn loop_delay(now: OffsetDateTime) {
-    let wait = Duration::from_secs(u64::from(60 - now.second())).checked_sub(Duration::from_nanos(u64::from(now.nanosecond()))).unwrap()
-        + Duration::from_millis(50);
-    sleep(wait);
 }

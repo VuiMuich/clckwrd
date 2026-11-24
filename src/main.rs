@@ -16,18 +16,21 @@ use std::path::Path;
 
 use crate::{
     template::Template,
-    time_processing::{
-        get_time_in_words, time_loop_combined, time_loop_simple, time_loop_template,
-    },
+    time_processing::{render, run_loop},
 };
 use clap::{arg, command};
-use rand::seq::SliceRandom;
 use time::{format_description::parse_borrowed, OffsetDateTime, Time};
+
+#[derive(Clone, Copy)]
+pub(crate) enum Mode {
+    Words,
+    Digital,
+    Combined,
+}
 
 // TODO implement structs properly
 // - write Tests for special cases, testing randomness of prepositions, check some random times.
 // - clean up 'err' and make fn panic
-// - import language templates
 // - add 'write to file'
 // - load template files
 // - handle Errors
@@ -70,63 +73,26 @@ fn main() {
         (None, None) => Template::default(),
     };
     let addendum = args.get_flag("addendum");
+    let mode = if args.get_flag("combined") {
+        Mode::Combined
+    } else if args.get_flag("digital") {
+        Mode::Digital
+    } else {
+        Mode::Words
+    };
 
-    if args.get_flag("quit") {
-        if addendum {
-            println!(
-                "{} {}",
-                get_time_in_words(&template, OffsetDateTime::now_local().unwrap().time()),
-                template.addendum.choose(&mut rand::thread_rng()).unwrap()
-            );
-        } else {
-            println!(
-                "{}",
-                get_time_in_words(&template, OffsetDateTime::now_local().unwrap().time())
-            );
-        }
-        return;
-    }
-
-    if let Some(time_input) = args.get_one::<String>("input") {
+    let fixed_time = args.get_one::<String>("input").map(|s| {
         let fmt = parse_borrowed::<1>("[hour]:[minute]").unwrap();
-        if addendum {
-            println!(
-                "{} {}",
-                get_time_in_words(
-                    &template,
-                    Time::parse(time_input, &fmt).expect("Wrong format, use `HH:MM`")
-                ),
-                template.addendum.choose(&mut rand::thread_rng()).flatten()
-            );
-        } else {
-            println!(
-                "{}",
-                get_time_in_words(
-                    &template,
-                    Time::parse(time_input, &fmt).expect("Wrong format, use `HH:MM`")
-                )
-            );
-        }
+        Time::parse(s, &fmt).expect("Wrong format, use `HH:MM`")
+    });
+
+    if args.get_flag("quit") || fixed_time.is_some() {
+        let time = fixed_time.unwrap_or_else(|| OffsetDateTime::now_local().unwrap().time());
+        println!("{}", render(mode, &template, time, addendum));
         return;
     }
 
-    if args.get_flag("digital") {
-        if args.get_flag("quit") {
-            return;
-        }
-
-        time_loop_simple()
-    }
-
-    if args.get_flag("combined") {
-        if args.get_flag("quit") {
-            return;
-        }
-
-        time_loop_combined(&template, addendum)
-    }
-
-    time_loop_template(&template, addendum)
+    run_loop(mode, &template, addendum)
 }
 
 fn templates_help() -> String {
