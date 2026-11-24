@@ -60,8 +60,6 @@
 
   on_the_hour_template: ["start_sentence", "preposition", "hour", "end_sentence"],
   normal_template: ["start_sentence", "preposition","minute","hour"],
-  //onTheHourTemplate: "It’s {{ p }} {{ h }} o’clock."
-  //template: "It’s {{ p }} {{ m }} {{ h }}."
 
   add_text: [
     "Time to do something good.",
