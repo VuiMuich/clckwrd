@@ -9,6 +9,7 @@ mod minutes;
 mod prepositions;
 mod special_cases;
 mod template;
+#[cfg(test)]
 mod tests;
 mod time_processing;
 
