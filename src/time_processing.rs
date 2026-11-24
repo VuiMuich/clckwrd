@@ -152,14 +152,18 @@ pub(crate) fn render(mode: Mode, template: &Template, time: Time, addendum: bool
     }
 }
 
+// Technically there are a bunch of edgecases, where we miss to print a new text on the minute,
+// but those should be pretty rare so we accept to have a delay of maximum one minute
 pub(crate) fn run_loop(mode: Mode, template: &Template, addendum: bool) -> ! {
+    let mut last = None;
     loop {
         let now = OffsetDateTime::now_local().unwrap();
-        println!("{}", render(mode, template, now.time(), addendum));
-        let wait = Duration::from_secs(u64::from(60 - now.second()))
-            .checked_sub(Duration::from_nanos(u64::from(now.nanosecond())))
-            .unwrap()
-            + Duration::from_millis(50);
-        sleep(wait);
+        let key = (now.hour(), now.minute());
+        if last != Some(key) {
+            println!("{}", render(mode, template, now.time(), addendum));
+            last = Some(key)
+        }
+        let into_minute = Duration::new(u64::from(now.second()), now.nanosecond());
+        sleep(Duration::from_secs(60) - into_minute + Duration::from_millis(50));
     }
 }
