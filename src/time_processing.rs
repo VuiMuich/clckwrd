@@ -21,16 +21,16 @@ pub(crate) fn get_time_in_words(template: &Template, local: Time) -> String {
     let special_cases = get_special_case_words(local, template);
 
     if let Some(special) = special_cases {
-        return special.to_string();
+        return special.clone();
     }
 
     let mut parts: Vec<&str> = Vec::new();
     parts.push(start_sentence.unwrap());
     parts.push(preposition.unwrap());
     if minute_slot != 0 {
-        parts.push(&minutes_string);
+        parts.push(minutes_string);
     }
-    parts.push(&hour_string);
+    parts.push(hour_string);
 
     let sentence = parts
         .into_iter()
@@ -154,9 +154,9 @@ pub(crate) fn run_loop(mode: Mode, template: &Template, addendum: bool) -> ! {
         let key = (now.hour(), now.minute());
         if last != Some(key) {
             println!("{}", render(mode, template, now.time(), addendum));
-            last = Some(key)
+            last = Some(key);
         }
         let into_minute = Duration::new(u64::from(now.second()), now.nanosecond());
-        sleep(Duration::from_secs(60) - into_minute + Duration::from_millis(50));
+        sleep(Duration::from_secs(60).checked_sub(into_minute).unwrap() + Duration::from_millis(50));
     }
 }
