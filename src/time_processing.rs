@@ -20,31 +20,24 @@ pub(crate) fn get_time_in_words(template: &Template, local: Time) -> String {
     let hour_string = get_hours_words(hour_overflow, template);
     let special_cases = get_special_case_words(local, template);
 
-    if let Some(is_special_case) = special_cases {
-        is_special_case.clone()
-    } else if minute_slot == 0 {
-        format!(
-            "{} {} {}.",
-            start_sentence.unwrap(),
-            preposition.unwrap(),
-            hour_string
-        )
-    } else if preposition == Some(&String::new()) {
-        format!(
-            "{} {} {}.",
-            start_sentence.unwrap(),
-            minutes_string,
-            hour_string
-        )
-    } else {
-        format!(
-            "{} {} {} {}.",
-            start_sentence.unwrap(),
-            preposition.unwrap(),
-            minutes_string,
-            hour_string
-        )
+    if let Some(special) = special_cases {
+        return special.to_string();
     }
+
+    let mut parts: Vec<&str> = Vec::new();
+    parts.push(start_sentence.unwrap());
+    parts.push(preposition.unwrap());
+    if minute_slot != 0 {
+        parts.push(&minutes_string);
+    }
+    parts.push(&hour_string);
+
+    let sentence = parts
+        .into_iter()
+        .filter(|p| !p.is_empty())
+        .collect::<Vec<_>>()
+        .join(" ");
+    format!("{sentence}.")
 }
 
 #[allow(clippy::unnested_or_patterns)]
