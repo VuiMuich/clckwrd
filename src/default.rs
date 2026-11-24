@@ -66,18 +66,18 @@ impl Default for Template {
             ],
             prepo_err: vec![String::from("The what??")],
         };
-        let start_sentence = vec![String::from("It's"), String::from("It is")];
-        let end_sentence = vec![String::from("o'clock")];
-        let combine_bridge = String::from("or in other words");
+        let start_sentence = vec![String::from("It’s"), String::from("It is")];
+        let end_sentence = vec![String::from("o’clock")];
+        let combine_bridge = String::from("or in other words:");
         let on_the_hour = vec![
             String::from("start_sentence"),
-            String::from("prepostition"),
+            String::from("preposition"),
             String::from("hour"),
             String::from("end_sentence"),
         ];
         let normal = vec![
             String::from("start_sentence"),
-            String::from("prepostition"),
+            String::from("preposition"),
             String::from("minute"),
             String::from("hour"),
         ];
