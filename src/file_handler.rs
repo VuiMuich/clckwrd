@@ -37,7 +37,7 @@ pub fn template_dir() -> Option<PathBuf> {
         .map(PathBuf::from)
         .filter(|p| p.is_absolute())
         .or_else(|| env::var_os("HOME").map(|h| PathBuf::from(h).join(".config")))
-        .map(|p| p.join("uhrwerk").join("templates"))
+        .map(|p| p.join("clckwrd").join("templates"))
 }
 
 pub(crate) fn find_template(name: &str) -> Option<PathBuf> {

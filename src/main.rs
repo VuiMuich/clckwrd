@@ -1,4 +1,4 @@
-// Uhrwerk is a CLI tool to print 'time in words'
+// Clckwrd is a CLI tool to print 'time in words'
 // It is heavily inspired by TickeTack (www.ticketack.de) and actuallrand::seq::SliceRandom::choose(&template.addendum, &mutrand::thread_rng())ight 2021, Johannes Mayrhofer
 // License MIT
 
@@ -32,7 +32,7 @@ use time::{format_description::parse_borrowed, OffsetDateTime, Time};
 // - load template files
 // - handle Errors
 fn main() {
-    let args = command!("Uhrwerk")
+    let args = command!("Clckwrd")
         .author("Johannes Mayrhofer <vuimuich@quantentunnel.de>")
         .version(env!("CARGO_PKG_VERSION"))
         .about("prints current system time in words continuously")
@@ -45,7 +45,7 @@ fn main() {
             arg!( -i --input <TIME> "Manually input a time in HH:MM (24h) format, implies `-q|--quit`" )
                 .conflicts_with("digital"),
             arg!( -l --language "Chose language. Available Languages see below"),
-            arg!( -t --template <NAME> "Use template file <NAME>.ron from $XDG_CONFIG_HOME/uhrwerk/templates")
+            arg!( -t --template <NAME> "Use template file <NAME>.ron from $XDG_CONFIG_HOME/clckwrd/templates")
                 .conflicts_with("path"),
             arg!( -p --path <PATH> "Use template from a custom path" ),
             arg!( -o --output "Wirte output to file with specified path"),
@@ -59,10 +59,14 @@ fn main() {
         args.get_one::<String>("template"),
     ) {
         (Some(path), _) => file_handler::load_template(Some(Path::new(path))),
-        (None, Some(name)) => if let Some(p) = file_handler::find_template(name) { file_handler::load_template(Some(&p)) } else {
-            eprintln!("uhrwerk: template '{name}.ron' not found in config dir");
-            std::process::exit(1);
-        },
+        (None, Some(name)) => {
+            if let Some(p) = file_handler::find_template(name) {
+                file_handler::load_template(Some(&p))
+            } else {
+                eprintln!("clckwrd: template '{name}.ron' not found in config dir");
+                std::process::exit(1);
+            }
+        }
         (None, None) => Template::default(),
     };
     let addendum = args.get_flag("addendum");
@@ -92,7 +96,7 @@ fn main() {
                     &template,
                     Time::parse(time_input, &fmt).expect("Wrong format, use `HH:MM`")
                 ),
-                template.addendum.choose(&mut rand::thread_rng()).unwrap()
+                template.addendum.choose(&mut rand::thread_rng()).flatten()
             );
         } else {
             println!(
@@ -126,7 +130,8 @@ fn main() {
 }
 
 fn templates_help() -> String {
-    let dir = file_handler::template_dir().map_or_else(|| "<no config dir>".into(), |d| d.display().to_string());
+    let dir = file_handler::template_dir()
+        .map_or_else(|| "<no config dir>".into(), |d| d.display().to_string());
     let names = file_handler::list_templates();
 
     if names.is_empty() {

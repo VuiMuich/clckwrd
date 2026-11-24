@@ -22,7 +22,7 @@
         packages.default = naersk-lib.buildPackage {
           src = ./.;
           postInstall = ''
-            install -Dm644 -t $out/share/uhrwerk/templates time-in-words-templates/*.ron
+            install -Dm644 -t $out/share/clckwrd/templates time-in-words-templates/*.ron
           '';
         };
         devShells.default =
