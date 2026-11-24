@@ -47,7 +47,6 @@ fn main() {
             arg!( -c --combined "Combines regular output with digital clock output (see '-d|--digital' flag)" ), 
             arg!( -i --input <TIME> "Manually input a time in HH:MM (24h) format, implies `-q|--quit`" )
                 .conflicts_with("digital"),
-            arg!( -l --language "Chose language. Available Languages see below"),
             arg!( -t --template <NAME> "Use template file <NAME>.ron from $XDG_CONFIG_HOME/clckwrd/templates")
                 .conflicts_with("path"),
             arg!( -p --path <PATH> "Use template from a custom path" ),
